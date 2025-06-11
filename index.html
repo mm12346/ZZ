@@ -139,19 +139,24 @@
         };
 
         // --- DOM ELEMENTS ---
-        const navContainer = document.querySelector('nav');
-        const headerTitle = document.getElementById('header-title');
-        const loader = document.getElementById('loader');
-        const allModules = {
-            summary: document.getElementById('summary-module'),
-            currency: document.getElementById('currency-module'),
-            stock: document.getElementById('stock-module'),
-            dividend: document.getElementById('dividend-module')
-        };
-        const currentRateInput = document.getElementById('current-rate');
-        const modal = document.getElementById('edit-modal');
-        const modalBackdrop = document.getElementById('modal-backdrop');
-        
+        let DOM = {};
+
+        function cacheDOMElements() {
+            DOM.navContainer = document.querySelector('nav');
+            DOM.headerTitle = document.getElementById('header-title');
+            DOM.loader = document.getElementById('loader');
+            DOM.allModules = {
+                summary: document.getElementById('summary-module'),
+                currency: document.getElementById('currency-module'),
+                stock: document.getElementById('stock-module'),
+                dividend: document.getElementById('dividend-module')
+            };
+            DOM.currentRateInput = document.getElementById('current-rate');
+            DOM.modal = document.getElementById('edit-modal');
+            DOM.modalBackdrop = document.getElementById('modal-backdrop');
+            DOM.fetchRateBtn = document.getElementById('btn-fetch-rate');
+        }
+
         
         // --- RENDERING FUNCTIONS ---
         function renderAll() {
@@ -184,8 +189,8 @@
 
         function renderCurrencyModule() {
             const content = `<div class="bg-white p-6 rounded-2xl shadow-sm mb-6"><h2 class="text-xl font-bold mb-4 text-gray-700">บันทึกการแลกเงิน (THB to USD)</h2><div class="grid md:grid-cols-2 gap-4"><div><label for="thb-amount" class="block text-sm font-medium text-gray-600 mb-1">จำนวนเงิน (บาท)</label><input type="number" id="thb-amount" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="เช่น 36500"></div><div><label for="exchange-rate" class="block text-sm font-medium text-gray-600 mb-1">อัตราแลกเปลี่ยน (THB/USD)</label><input type="number" id="exchange-rate" step="0.01" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="เช่น 36.50"></div></div><div class="mt-4 bg-blue-50 p-4 rounded-lg text-blue-800"><p class="flex justify-between items-center"><span>จะได้รับ USD:</span> <strong id="usd-result" class="text-lg">0.00</strong></p></div><button id="save-currency" class="mt-6 w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">บันทึกรายการ</button></div><div><h3 class="text-lg font-bold mb-3 text-gray-700">ประวัติการแลกเปลี่ยน</h3><div class="overflow-x-auto bg-white rounded-2xl shadow-sm"><table class="w-full text-sm text-left"><thead class="bg-gray-100 text-gray-600 uppercase"><tr><th class="p-4">วันที่</th><th class="p-4">THB</th><th class="p-4">เรท</th><th class="p-4">USD</th><th class="p-4 text-center">จัดการ</th></tr></thead><tbody id="currency-history-table"></tbody></table></div></div>`;
-            allModules.currency.innerHTML = content;
-            const tableBody = allModules.currency.querySelector('#currency-history-table');
+            DOM.allModules.currency.innerHTML = content;
+            const tableBody = DOM.allModules.currency.querySelector('#currency-history-table');
             tableBody.innerHTML = (appState.currency || []).map(row => `
                 <tr class="border-b border-gray-200 hover:bg-gray-50">
                     <td class="p-4">${new Date(row.Timestamp).toLocaleDateString('th-TH')}</td>
@@ -199,10 +204,10 @@
                 </tr>
             `).join('') || `<tr><td colspan="5" class="text-center p-4 text-gray-500">ไม่มีข้อมูล</td></tr>`;
             
-            allModules.currency.querySelector('#save-currency').addEventListener('click', saveCurrency);
-            const thbInput = allModules.currency.querySelector('#thb-amount');
-            const rateInput = allModules.currency.querySelector('#exchange-rate');
-            const usdResult = allModules.currency.querySelector('#usd-result');
+            DOM.allModules.currency.querySelector('#save-currency').addEventListener('click', saveCurrency);
+            const thbInput = DOM.allModules.currency.querySelector('#thb-amount');
+            const rateInput = DOM.allModules.currency.querySelector('#exchange-rate');
+            const usdResult = DOM.allModules.currency.querySelector('#usd-result');
             const calc = () => {
                 const thb = parseFloat(thbInput.value) || 0;
                 const rate = parseFloat(rateInput.value) || 0;
@@ -214,8 +219,8 @@
 
         function renderStockModule() {
             const content = `<div class="bg-white p-6 rounded-2xl shadow-sm mb-6"><h2 class="text-xl font-bold mb-4 text-gray-700">บันทึกการซื้อ-ขายหุ้น</h2><div class="mb-4"><label for="stock-name" class="block text-sm font-medium text-gray-600 mb-1">ชื่อหุ้น (Symbol)</label><input type="text" id="stock-name" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="เช่น GOOGL, TSLA"></div><div class="grid grid-cols-2 gap-4 mb-4"><div><label for="purchase-price" class="block text-sm font-medium text-gray-600 mb-1">ราคาซื้อรวม (USD)</label><input type="number" id="purchase-price" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="1000"></div><div><label for="purchase-vat" class="block text-sm font-medium text-gray-600 mb-1">VAT ซื้อ (USD)</label><input type="number" id="purchase-vat" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="10"></div></div><div class="grid grid-cols-2 gap-4"><div><label for="sale-price" class="block text-sm font-medium text-gray-600 mb-1">ราคาขายรวม (USD)</label><input type="number" id="sale-price" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="1200"></div><div><label for="sale-vat" class="block text-sm font-medium text-gray-600 mb-1">VAT ขาย (USD)</label><input type="number" id="sale-vat" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="12"></div></div><button id="save-stock" class="mt-6 w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors">บันทึกรายการซื้อขาย</button></div><div><h3 class="text-lg font-bold mb-3 text-gray-700">ประวัติการซื้อขาย</h3><div class="overflow-x-auto bg-white rounded-2xl shadow-sm"><table class="w-full text-sm text-left"><thead class="bg-gray-100 text-gray-600 uppercase"><tr><th class="p-4">ชื่อหุ้น</th><th class="p-4">ราคาซื้อ</th><th class="p-4">VAT ขาย</th><th class="p-4">ราคาขาย</th><th class="p-4">กำไร/ขาดทุน</th><th class="p-4 text-center">จัดการ</th></tr></thead><tbody id="stock-history-table"></tbody></table></div></div>`;
-            allModules.stock.innerHTML = content;
-            const tableBody = allModules.stock.querySelector('#stock-history-table');
+            DOM.allModules.stock.innerHTML = content;
+            const tableBody = DOM.allModules.stock.querySelector('#stock-history-table');
             tableBody.innerHTML = (appState.stocks || []).map(row => `
                  <tr class="border-b border-gray-200 hover:bg-gray-50">
                     <td class="p-4 font-semibold">${row.Stock_Name}</td>
@@ -229,13 +234,13 @@
                     </td>
                 </tr>
             `).join('') || `<tr><td colspan="6" class="text-center p-4 text-gray-500">ไม่มีข้อมูล</td></tr>`;
-            allModules.stock.querySelector('#save-stock').addEventListener('click', saveStock);
+            DOM.allModules.stock.querySelector('#save-stock').addEventListener('click', saveStock);
         }
 
         function renderDividendModule() {
             const content = `<div class="bg-white p-6 rounded-2xl shadow-sm mb-6"><h2 class="text-xl font-bold mb-4 text-gray-700">บันทึกเงินปันผล</h2><div class="mb-4"><label for="div-stock-name" class="block text-sm font-medium text-gray-600 mb-1">ชื่อหุ้น (Symbol)</label><input type="text" id="div-stock-name" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="เช่น AAPL, PTT"></div><div class="grid grid-cols-2 gap-4"><div><label for="dividend-amount" class="block text-sm font-medium text-gray-600 mb-1">ปันผลที่ได้รับ (USD)</label><input type="number" id="dividend-amount" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="100"></div><div><label for="dividend-tax" class="block text-sm font-medium text-gray-600 mb-1">ภาษีหัก ณ ที่จ่าย (USD)</label><input type="number" id="dividend-tax" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="15"></div></div><button id="save-dividend" class="mt-6 w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-purple-700 transition-colors">บันทึกเงินปันผล</button></div><div><h3 class="text-lg font-bold mb-3 text-gray-700">ประวัติเงินปันผล</h3><div class="overflow-x-auto bg-white rounded-2xl shadow-sm"><table class="w-full text-sm text-left"><thead class="bg-gray-100 text-gray-600 uppercase"><tr><th class="p-4">ชื่อหุ้น</th><th class="p-4">ปันผล</th><th class="p-4">ภาษี</th><th class="p-4">ปันผลสุทธิ</th><th class="p-4 text-center">จัดการ</th></tr></thead><tbody id="dividend-history-table"></tbody></table></div></div>`;
-            allModules.dividend.innerHTML = content;
-            const tableBody = allModules.dividend.querySelector('#dividend-history-table');
+            DOM.allModules.dividend.innerHTML = content;
+            const tableBody = DOM.allModules.dividend.querySelector('#dividend-history-table');
             tableBody.innerHTML = (appState.dividends || []).map(row => `
                 <tr class="border-b border-gray-200 hover:bg-gray-50">
                     <td class="p-4 font-semibold">${row.Stock_Name}</td>
@@ -248,13 +253,13 @@
                     </td>
                 </tr>
             `).join('') || `<tr><td colspan="5" class="text-center p-4 text-gray-500">ไม่มีข้อมูล</td></tr>`;
-            allModules.dividend.querySelector('#save-dividend').addEventListener('click', saveDividend);
+            DOM.allModules.dividend.querySelector('#save-dividend').addEventListener('click', saveDividend);
         }
 
         // --- DATA HANDLING ---
         function setLoading(isLoading) {
             appState.isLoading = isLoading;
-            loader.classList.toggle('hidden', !isLoading);
+            DOM.loader.classList.toggle('hidden', !isLoading);
         }
 
         async function postData(action, payload) {
@@ -286,7 +291,9 @@
         }
 
         function editRecord(type, id) {
-            const dataSet = appState[type];
+            const dataSetKey = type === 'stock' ? 'stocks' : type + 's';
+            const dataSet = appState[dataSetKey];
+
             if (!dataSet) return;
             const record = dataSet.find(item => item.ID === id);
             if (!record) return;
@@ -328,14 +335,14 @@
                     break;
             }
             formContent.innerHTML = formHtml;
-            modal.classList.remove('hidden');
-            modalBackdrop.classList.remove('hidden');
+            DOM.modal.classList.remove('hidden');
+            DOM.modalBackdrop.classList.remove('hidden');
         }
 
         function closeEditModal() {
             appState.editMode = { active: false, type: null, id: null };
-            modal.classList.add('hidden');
-            modalBackdrop.classList.add('hidden');
+            DOM.modal.classList.add('hidden');
+            DOM.modalBackdrop.classList.add('hidden');
         }
 
         function handleUpdate() {
@@ -372,55 +379,52 @@
             closeEditModal();
         }
 
-        document.getElementById('modal-cancel-btn').addEventListener('click', closeEditModal);
-        document.getElementById('modal-update-btn').addEventListener('click', handleUpdate);
-
         function saveCurrency() {
-            const thbAmount = parseFloat(allModules.currency.querySelector('#thb-amount').value);
-            const exchangeRate = parseFloat(allModules.currency.querySelector('#exchange-rate').value);
+            const thbAmount = parseFloat(DOM.allModules.currency.querySelector('#thb-amount').value);
+            const exchangeRate = parseFloat(DOM.allModules.currency.querySelector('#exchange-rate').value);
             if (!thbAmount || !exchangeRate || thbAmount <= 0 || exchangeRate <= 0) {
                 alert('กรุณากรอกข้อมูลการแลกเงินให้ถูกต้อง');
                 return;
             }
             postData('addCurrency', { thbAmount, exchangeRate });
-            allModules.currency.querySelector('#thb-amount').value = '';
-            allModules.currency.querySelector('#exchange-rate').value = '';
+            DOM.allModules.currency.querySelector('#thb-amount').value = '';
+            DOM.allModules.currency.querySelector('#exchange-rate').value = '';
         }
 
         function saveStock() {
             const payload = {
-                stockName: allModules.stock.querySelector('#stock-name').value,
-                purchasePrice: parseFloat(allModules.stock.querySelector('#purchase-price').value) || 0,
-                vatPurchase: parseFloat(allModules.stock.querySelector('#purchase-vat').value) || 0,
-                salePrice: parseFloat(allModules.stock.querySelector('#sale-price').value) || 0,
-                vatSale: parseFloat(allModules.stock.querySelector('#sale-vat').value) || 0
+                stockName: DOM.allModules.stock.querySelector('#stock-name').value,
+                purchasePrice: parseFloat(DOM.allModules.stock.querySelector('#purchase-price').value) || 0,
+                vatPurchase: parseFloat(DOM.allModules.stock.querySelector('#purchase-vat').value) || 0,
+                salePrice: parseFloat(DOM.allModules.stock.querySelector('#sale-price').value) || 0,
+                vatSale: parseFloat(DOM.allModules.stock.querySelector('#sale-vat').value) || 0
             };
             if (!payload.stockName || !payload.purchasePrice || !payload.salePrice) {
                 alert('กรุณากรอกชื่อหุ้น, ราคาซื้อ, และราคาขาย');
                 return;
             }
             postData('addStock', payload);
-            allModules.stock.querySelector('#stock-name').value = '';
-            allModules.stock.querySelector('#purchase-price').value = '';
-            allModules.stock.querySelector('#purchase-vat').value = '';
-            allModules.stock.querySelector('#sale-price').value = '';
-            allModules.stock.querySelector('#sale-vat').value = '';
+            DOM.allModules.stock.querySelector('#stock-name').value = '';
+            DOM.allModules.stock.querySelector('#purchase-price').value = '';
+            DOM.allModules.stock.querySelector('#purchase-vat').value = '';
+            DOM.allModules.stock.querySelector('#sale-price').value = '';
+            DOM.allModules.stock.querySelector('#sale-vat').value = '';
         }
 
         function saveDividend() {
             const payload = {
-                stockName: allModules.dividend.querySelector('#div-stock-name').value,
-                dividendAmount: parseFloat(allModules.dividend.querySelector('#dividend-amount').value) || 0,
-                taxAmount: parseFloat(allModules.dividend.querySelector('#dividend-tax').value) || 0
+                stockName: DOM.allModules.dividend.querySelector('#div-stock-name').value,
+                dividendAmount: parseFloat(DOM.allModules.dividend.querySelector('#dividend-amount').value) || 0,
+                taxAmount: parseFloat(DOM.allModules.dividend.querySelector('#dividend-tax').value) || 0
             };
             if (!payload.stockName || !payload.dividendAmount) {
                 alert('กรุณากรอกชื่อหุ้นและจำนวนปันผล');
                 return;
             }
             postData('addDividend', payload);
-            allModules.dividend.querySelector('#div-stock-name').value = '';
-            allModules.dividend.querySelector('#dividend-amount').value = '';
-            allModules.dividend.querySelector('#dividend-tax').value = '';
+            DOM.allModules.dividend.querySelector('#div-stock-name').value = '';
+            DOM.allModules.dividend.querySelector('#dividend-amount').value = '';
+            DOM.allModules.dividend.querySelector('#dividend-tax').value = '';
         }
 
 
@@ -431,34 +435,37 @@
             button.classList.add('active');
             
             const targetModuleId = button.id.replace('nav-btn-', '');
-            headerTitle.textContent = button.dataset.title;
+            DOM.headerTitle.textContent = button.dataset.title;
 
-            Object.values(allModules).forEach(mod => mod.classList.add('hidden'));
-            allModules[targetModuleId].classList.remove('hidden');
+            Object.values(DOM.allModules).forEach(mod => mod.classList.add('hidden'));
+            DOM.allModules[targetModuleId].classList.remove('hidden');
         }
 
-        navContainer.addEventListener('click', (event) => {
-            const button = event.target.closest('.nav-btn');
-            if (button) {
-                setActiveTab(button);
-            }
-        });
-
-
         // --- Exchange Rate API ---
-        const fetchRateBtn = document.getElementById('btn-fetch-rate');
-        const apiLimitMessage = document.getElementById('api-limit-message');
         const EXCHANGE_RATE_API_KEY = '2b50f0188f18dbe19a515559';
         const EXCHANGE_RATE_API_URL = `https://v6.exchangerate-api.com/v6/${EXCHANGE_RATE_API_KEY}/latest/USD`;
         const DAILY_LIMIT = 32;
 
-        function checkApiLimit() { /* ... unchanged ... */ }
-        async function fetchExchangeRate() { /* ... unchanged ... */ }
-        fetchRateBtn.addEventListener('click', fetchExchangeRate);
+        function checkApiLimit() { /* ... */ }
+        async function fetchExchangeRate() { /* ... */ }
 
         // --- Summary Calculations ---
-        function updateSummaryCalculations() { /* ... unchanged ... */ }
-        currentRateInput.addEventListener('input', updateSummaryCalculations);
+        function updateSummaryCalculations() {
+            const { summary } = appState;
+            const currentRate = parseFloat(DOM.currentRateInput.value) || 0;
+            const portfolioValueUSD = (summary.initialCapitalUSD || 0) + (summary.netPL || 0);
+
+            document.getElementById('summary-total-value-usd').textContent = portfolioValueUSD.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('summary-total-value-thb').textContent = (currentRate > 0) ? (portfolioValueUSD * currentRate).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00';
+            
+            const percentageReturn = ((summary.initialCapitalUSD || 0) > 0) ? ((summary.netPL || 0) / summary.initialCapitalUSD) * 100 : 0;
+            const percentDisplay = document.getElementById('summary-total-return-percent');
+            percentDisplay.textContent = `(${percentageReturn.toFixed(2)}%)`;
+            percentDisplay.className = 'text-lg font-bold';
+            if (percentageReturn > 0) percentDisplay.classList.add('profit');
+            else if (percentageReturn < 0) percentDisplay.classList.add('loss');
+            else percentDisplay.classList.add('text-gray-800');
+        }
 
         // --- INITIALIZATION ---
         async function init() {
@@ -481,9 +488,22 @@
         }
         
         document.addEventListener('DOMContentLoaded', () => {
+            cacheDOMElements();
             setActiveTab(document.querySelector('.nav-btn.active'));
             checkApiLimit();
             init();
+
+            // Attach static event listeners here
+            DOM.navContainer.addEventListener('click', (event) => {
+                const button = event.target.closest('.nav-btn');
+                if (button) {
+                    setActiveTab(button);
+                }
+            });
+            DOM.currentRateInput.addEventListener('input', updateSummaryCalculations);
+            DOM.fetchRateBtn.addEventListener('click', fetchExchangeRate);
+            document.getElementById('modal-cancel-btn').addEventListener('click', closeEditModal);
+            document.getElementById('modal-update-btn').addEventListener('click', handleUpdate);
         });
     </script>
 </body>
