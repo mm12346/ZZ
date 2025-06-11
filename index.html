@@ -200,7 +200,16 @@
             `).join('') || `<tr><td colspan="5" class="text-center p-4 text-gray-500">ไม่มีข้อมูล</td></tr>`;
             
             allModules.currency.querySelector('#save-currency').addEventListener('click', saveCurrency);
-            // ... (Event listeners for input fields)
+            const thbInput = allModules.currency.querySelector('#thb-amount');
+            const rateInput = allModules.currency.querySelector('#exchange-rate');
+            const usdResult = allModules.currency.querySelector('#usd-result');
+            const calc = () => {
+                const thb = parseFloat(thbInput.value) || 0;
+                const rate = parseFloat(rateInput.value) || 0;
+                usdResult.textContent = rate > 0 ? (thb / rate).toLocaleString('en-US', {minimumFractionDigits: 2}) : '0.00';
+            };
+            if(thbInput) thbInput.addEventListener('input', calc);
+            if(rateInput) rateInput.addEventListener('input', calc);
         }
 
         function renderStockModule() {
@@ -478,4 +487,4 @@
         });
     </script>
 </body>
-</ht
+</html>
