@@ -167,7 +167,7 @@
         }
 
         function renderCurrencyModule() {
-            const content = `<div class="bg-white p-6 rounded-2xl shadow-sm mb-6"><h2 class="text-xl font-bold mb-4 text-gray-700">บันทึกการแลกเงิน (THB to USD)</h2><div class="grid md:grid-cols-2 gap-4"><div><label for="thb-amount" class="block text-sm font-medium text-gray-600 mb-1">จำนวนเงิน (บาท)</label><input type="number" id="thb-amount" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="เช่น 36500"></div><div><label for="exchange-rate" class="block text-sm font-medium text-gray-600 mb-1">อัตราแลกเปลี่ยน (THB/USD)</label><input type="number" id="exchange-rate" step="0.01" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="เช่น 36.50"></div></div><div class="mt-4 bg-blue-50 p-4 rounded-lg text-blue-800"><p class="flex justify-between items-center"><span>จะได้รับ USD:</span> <strong id="usd-result" class="text-lg">0.00</strong></p></div><button id="save-currency" class="mt-6 w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">บันทึกรายการ</button></div><div><h3 class="text-lg font-bold mb-3 text-gray-700">ประวัติการแลกเปลี่ยน</h3><div class="overflow-x-auto bg-white rounded-2xl shadow-sm"><table class="w-full text-sm text-left"><thead class="bg-gray-100 text-gray-600 uppercase"><tr><th class="p-4">วันที่</th><th class="p-4">THB</th><th class="p-4">เรท</th><th class="p-4">USD</th></tr></thead><tbody id="currency-history-table"></tbody></table></div></div>`;
+            const content = `<div class="bg-white p-6 rounded-2xl shadow-sm mb-6"><h2 class="text-xl font-bold mb-4 text-gray-700">บันทึกการแลกเงิน (THB to USD)</h2><div class="grid md:grid-cols-2 gap-4"><div><label for="thb-amount" class="block text-sm font-medium text-gray-600 mb-1">จำนวนเงิน (บาท)</label><input type="number" id="thb-amount" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="เช่น 36500"></div><div><label for="exchange-rate" class="block text-sm font-medium text-gray-600 mb-1">อัตราแลกเปลี่ยน (THB/USD)</label><input type="number" id="exchange-rate" step="0.01" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="เช่น 36.50"></div></div><div class="mt-4 bg-blue-50 p-4 rounded-lg text-blue-800"><p class="flex justify-between items-center"><span>จะได้รับ USD:</span> <strong id="usd-result" class="text-lg">0.00</strong></p></div><button id="save-currency" class="mt-6 w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">บันทึกรายการ</button></div><div><h3 class="text-lg font-bold mb-3 text-gray-700">ประวัติการแลกเปลี่ยน</h3><div class="overflow-x-auto bg-white rounded-2xl shadow-sm"><table class="w-full text-sm text-left"><thead class="bg-gray-100 text-gray-600 uppercase"><tr><th class="p-4">วันที่</th><th class="p-4">THB</th><th class="p-4">เรท</th><th class="p-4">USD</th><th class="p-4 text-center">จัดการ</th></tr></thead><tbody id="currency-history-table"></tbody></table></div></div>`;
             allModules.currency.innerHTML = content;
             const tableBody = allModules.currency.querySelector('#currency-history-table');
             tableBody.innerHTML = (appState.currency || []).map(row => `
@@ -176,8 +176,12 @@
                     <td class="p-4">${(row.THB_Amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                     <td class="p-4">${(row.Exchange_Rate || 0).toFixed(2)}</td>
                     <td class="p-4 font-semibold">${(row.USD_Amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td class="p-4 text-center">
+                         <button onclick="editRecord('currency', '${row.ID}')" class="text-yellow-500 hover:text-yellow-700 mr-2 text-sm">แก้ไข</button>
+                         <button onclick="deleteRecord('currency', '${row.ID}')" class="text-red-500 hover:text-red-700 text-sm">ลบ</button>
+                    </td>
                 </tr>
-            `).join('') || `<tr><td colspan="4" class="text-center p-4 text-gray-500">ไม่มีข้อมูล</td></tr>`;
+            `).join('') || `<tr><td colspan="5" class="text-center p-4 text-gray-500">ไม่มีข้อมูล</td></tr>`;
             
             allModules.currency.querySelector('#save-currency').addEventListener('click', saveCurrency);
             const thbInput = allModules.currency.querySelector('#thb-amount');
@@ -193,7 +197,7 @@
         }
 
         function renderStockModule() {
-            const content = `<div class="bg-white p-6 rounded-2xl shadow-sm mb-6"><h2 class="text-xl font-bold mb-4 text-gray-700">บันทึกการซื้อ-ขายหุ้น</h2><div class="mb-4"><label for="stock-name" class="block text-sm font-medium text-gray-600 mb-1">ชื่อหุ้น (Symbol)</label><input type="text" id="stock-name" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="เช่น GOOGL, TSLA"></div><div class="grid grid-cols-2 gap-4 mb-4"><div><label for="purchase-price" class="block text-sm font-medium text-gray-600 mb-1">ราคาซื้อรวม (USD)</label><input type="number" id="purchase-price" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="1000"></div><div><label for="purchase-vat" class="block text-sm font-medium text-gray-600 mb-1">VAT ซื้อ (USD)</label><input type="number" id="purchase-vat" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="10"></div></div><div class="grid grid-cols-2 gap-4"><div><label for="sale-price" class="block text-sm font-medium text-gray-600 mb-1">ราคาขายรวม (USD)</label><input type="number" id="sale-price" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="1200"></div><div><label for="sale-vat" class="block text-sm font-medium text-gray-600 mb-1">VAT ขาย (USD)</label><input type="number" id="sale-vat" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="12"></div></div><button id="save-stock" class="mt-6 w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors">บันทึกรายการซื้อขาย</button></div><div><h3 class="text-lg font-bold mb-3 text-gray-700">ประวัติการซื้อขาย</h3><div class="overflow-x-auto bg-white rounded-2xl shadow-sm"><table class="w-full text-sm text-left"><thead class="bg-gray-100 text-gray-600 uppercase"><tr><th class="p-4">ชื่อหุ้น</th><th class="p-4">ราคาซื้อ</th><th class="p-4">VAT ขาย</th><th class="p-4">ราคาขาย</th><th class="p-4">กำไร/ขาดทุน</th></tr></thead><tbody id="stock-history-table"></tbody></table></div></div>`;
+            const content = `<div class="bg-white p-6 rounded-2xl shadow-sm mb-6"><h2 class="text-xl font-bold mb-4 text-gray-700">บันทึกการซื้อ-ขายหุ้น</h2><div class="mb-4"><label for="stock-name" class="block text-sm font-medium text-gray-600 mb-1">ชื่อหุ้น (Symbol)</label><input type="text" id="stock-name" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="เช่น GOOGL, TSLA"></div><div class="grid grid-cols-2 gap-4 mb-4"><div><label for="purchase-price" class="block text-sm font-medium text-gray-600 mb-1">ราคาซื้อรวม (USD)</label><input type="number" id="purchase-price" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="1000"></div><div><label for="purchase-vat" class="block text-sm font-medium text-gray-600 mb-1">VAT ซื้อ (USD)</label><input type="number" id="purchase-vat" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="10"></div></div><div class="grid grid-cols-2 gap-4"><div><label for="sale-price" class="block text-sm font-medium text-gray-600 mb-1">ราคาขายรวม (USD)</label><input type="number" id="sale-price" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="1200"></div><div><label for="sale-vat" class="block text-sm font-medium text-gray-600 mb-1">VAT ขาย (USD)</label><input type="number" id="sale-vat" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="12"></div></div><button id="save-stock" class="mt-6 w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors">บันทึกรายการซื้อขาย</button></div><div><h3 class="text-lg font-bold mb-3 text-gray-700">ประวัติการซื้อขาย</h3><div class="overflow-x-auto bg-white rounded-2xl shadow-sm"><table class="w-full text-sm text-left"><thead class="bg-gray-100 text-gray-600 uppercase"><tr><th class="p-4">ชื่อหุ้น</th><th class="p-4">ราคาซื้อ</th><th class="p-4">VAT ขาย</th><th class="p-4">ราคาขาย</th><th class="p-4">กำไร/ขาดทุน</th><th class="p-4 text-center">จัดการ</th></tr></thead><tbody id="stock-history-table"></tbody></table></div></div>`;
             allModules.stock.innerHTML = content;
             const tableBody = allModules.stock.querySelector('#stock-history-table');
             tableBody.innerHTML = (appState.stocks || []).map(row => `
@@ -203,13 +207,17 @@
                     <td class="p-4">${(row.VAT_Sale_USD || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
                     <td class="p-4">${(row.Sale_Price_USD || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
                     <td class="p-4 font-bold ${row.Profit_Loss_USD >= 0 ? 'profit' : 'loss'}">${(row.Profit_Loss_USD || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                    <td class="p-4 text-center">
+                         <button onclick="editRecord('stock', '${row.ID}')" class="text-yellow-500 hover:text-yellow-700 mr-2 text-sm">แก้ไข</button>
+                         <button onclick="deleteRecord('stock', '${row.ID}')" class="text-red-500 hover:text-red-700 text-sm">ลบ</button>
+                    </td>
                 </tr>
-            `).join('') || `<tr><td colspan="5" class="text-center p-4 text-gray-500">ไม่มีข้อมูล</td></tr>`;
+            `).join('') || `<tr><td colspan="6" class="text-center p-4 text-gray-500">ไม่มีข้อมูล</td></tr>`;
             allModules.stock.querySelector('#save-stock').addEventListener('click', saveStock);
         }
 
         function renderDividendModule() {
-            const content = `<div class="bg-white p-6 rounded-2xl shadow-sm mb-6"><h2 class="text-xl font-bold mb-4 text-gray-700">บันทึกเงินปันผล</h2><div class="mb-4"><label for="div-stock-name" class="block text-sm font-medium text-gray-600 mb-1">ชื่อหุ้น (Symbol)</label><input type="text" id="div-stock-name" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="เช่น AAPL, PTT"></div><div class="grid grid-cols-2 gap-4"><div><label for="dividend-amount" class="block text-sm font-medium text-gray-600 mb-1">ปันผลที่ได้รับ (USD)</label><input type="number" id="dividend-amount" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="100"></div><div><label for="dividend-tax" class="block text-sm font-medium text-gray-600 mb-1">ภาษีหัก ณ ที่จ่าย (USD)</label><input type="number" id="dividend-tax" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="15"></div></div><button id="save-dividend" class="mt-6 w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-purple-700 transition-colors">บันทึกเงินปันผล</button></div><div><h3 class="text-lg font-bold mb-3 text-gray-700">ประวัติเงินปันผล</h3><div class="overflow-x-auto bg-white rounded-2xl shadow-sm"><table class="w-full text-sm text-left"><thead class="bg-gray-100 text-gray-600 uppercase"><tr><th class="p-4">ชื่อหุ้น</th><th class="p-4">ปันผล</th><th class="p-4">ภาษี</th><th class="p-4">ปันผลสุทธิ</th></tr></thead><tbody id="dividend-history-table"></tbody></table></div></div>`;
+            const content = `<div class="bg-white p-6 rounded-2xl shadow-sm mb-6"><h2 class="text-xl font-bold mb-4 text-gray-700">บันทึกเงินปันผล</h2><div class="mb-4"><label for="div-stock-name" class="block text-sm font-medium text-gray-600 mb-1">ชื่อหุ้น (Symbol)</label><input type="text" id="div-stock-name" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="เช่น AAPL, PTT"></div><div class="grid grid-cols-2 gap-4"><div><label for="dividend-amount" class="block text-sm font-medium text-gray-600 mb-1">ปันผลที่ได้รับ (USD)</label><input type="number" id="dividend-amount" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="100"></div><div><label for="dividend-tax" class="block text-sm font-medium text-gray-600 mb-1">ภาษีหัก ณ ที่จ่าย (USD)</label><input type="number" id="dividend-tax" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="15"></div></div><button id="save-dividend" class="mt-6 w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-purple-700 transition-colors">บันทึกเงินปันผล</button></div><div><h3 class="text-lg font-bold mb-3 text-gray-700">ประวัติเงินปันผล</h3><div class="overflow-x-auto bg-white rounded-2xl shadow-sm"><table class="w-full text-sm text-left"><thead class="bg-gray-100 text-gray-600 uppercase"><tr><th class="p-4">ชื่อหุ้น</th><th class="p-4">ปันผล</th><th class="p-4">ภาษี</th><th class="p-4">ปันผลสุทธิ</th><th class="p-4 text-center">จัดการ</th></tr></thead><tbody id="dividend-history-table"></tbody></table></div></div>`;
             allModules.dividend.innerHTML = content;
             const tableBody = allModules.dividend.querySelector('#dividend-history-table');
             tableBody.innerHTML = (appState.dividends || []).map(row => `
@@ -218,8 +226,12 @@
                     <td class="p-4">${(row.Dividend_Amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
                     <td class="p-4">${(row.Tax_Amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
                     <td class="p-4 font-bold profit">${(row.Net_Dividend || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                     <td class="p-4 text-center">
+                         <button onclick="editRecord('dividend', '${row.ID}')" class="text-yellow-500 hover:text-yellow-700 mr-2 text-sm">แก้ไข</button>
+                         <button onclick="deleteRecord('dividend', '${row.ID}')" class="text-red-500 hover:text-red-700 text-sm">ลบ</button>
+                    </td>
                 </tr>
-            `).join('') || `<tr><td colspan="4" class="text-center p-4 text-gray-500">ไม่มีข้อมูล</td></tr>`;
+            `).join('') || `<tr><td colspan="5" class="text-center p-4 text-gray-500">ไม่มีข้อมูล</td></tr>`;
             allModules.dividend.querySelector('#save-dividend').addEventListener('click', saveDividend);
         }
 
@@ -272,6 +284,19 @@
                  console.error('Error in postData:', error);
                  setLoading(false);
             }
+        }
+        
+        function editRecord(type, id) {
+            console.log(`EDIT action triggered for type: ${type}, ID: ${id}`);
+            alert(`ฟังก์ชัน "แก้ไข" ยังไม่เปิดใช้งาน`);
+        }
+
+        function deleteRecord(type, id) {
+             if (window.confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?`)) {
+                console.log(`DELETE action triggered for type: ${type}, ID: ${id}`);
+                alert(`ฟังก์ชัน "ลบ" ยังไม่เปิดใช้งาน`);
+                // Future implementation: postData('deleteRecord', { type, id });
+             }
         }
 
 
