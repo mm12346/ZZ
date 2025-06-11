@@ -100,37 +100,9 @@
 
     <script>
         // --- PWA SETUP ---
-
-        // Create virtual manifest.json
-        const manifest = {
-            "name": "Investment Tracker",
-            "short_name": "Tracker",
-            "start_url": ".",
-            "display": "standalone",
-            "background_color": "#f9fafb",
-            "theme_color": "#ffffff",
-            "description": "App for tracking currency exchange and stock portfolio.",
-            "icons": [
-                {
-                    "src": "https://placehold.co/192x192/2563eb/ffffff?text=Tracker",
-                    "sizes": "192x192",
-                    "type": "image/png"
-                },
-                {
-                    "src": "https://placehold.co/512x512/2563eb/ffffff?text=Tracker",
-                    "sizes": "512x512",
-                    "type": "image/png"
-                }
-            ]
-        };
-        const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
-        const manifestURL = URL.createObjectURL(manifestBlob);
-        document.querySelector('link[rel="manifest"]').setAttribute('href', manifestURL);
-
-        // Service Worker Registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
+                navigator.serviceWorker.register('./sw.js') // Changed to relative path
                     .then(registration => {
                         console.log('ServiceWorker registration successful with scope: ', registration.scope);
                     })
