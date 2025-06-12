@@ -292,12 +292,19 @@
         }
 
         function editRecord(type, id) {
-            const dataSetKey = type === 'stock' ? 'stocks' : type + 's';
+            const dataSetKeyMap = { currency: 'currency', stock: 'stocks', dividend: 'dividends' };
+            const dataSetKey = dataSetKeyMap[type];
             const dataSet = appState[dataSetKey];
 
-            if (!dataSet) return;
-            const record = dataSet.find(item => item.ID === id);
-            if (!record) return;
+            if (!dataSet) {
+                console.error(`Dataset for type "${type}" is not found.`);
+                return;
+            };
+            const record = dataSet.find(item => String(item.ID) === String(id));
+            if (!record) {
+                console.error(`Record with ID "${id}" not found in dataset for type "${type}".`);
+                return;
+            };
 
             appState.editMode = { active: true, type, id };
             openEditModal(type, record);
@@ -502,7 +509,6 @@
                 checkApiLimit();
             }
         }
-
 
         // --- Summary Calculations ---
         function updateSummaryCalculations() {
