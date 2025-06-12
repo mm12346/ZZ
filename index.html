@@ -155,6 +155,7 @@
             DOM.modal = document.getElementById('edit-modal');
             DOM.modalBackdrop = document.getElementById('modal-backdrop');
             DOM.fetchRateBtn = document.getElementById('btn-fetch-rate');
+            DOM.apiLimitMessage = document.getElementById('api-limit-message');
         }
 
         
@@ -446,8 +447,61 @@
         const EXCHANGE_RATE_API_URL = `https://v6.exchangerate-api.com/v6/${EXCHANGE_RATE_API_KEY}/latest/USD`;
         const DAILY_LIMIT = 32;
 
-        function checkApiLimit() { /* ... */ }
-        async function fetchExchangeRate() { /* ... */ }
+        function checkApiLimit() {
+            const today = new Date().toISOString().split('T')[0];
+            let apiUsage = JSON.parse(localStorage.getItem('apiUsage')) || { date: today, count: 0 };
+            
+            if (apiUsage.date !== today) {
+                apiUsage = { date: today, count: 0 };
+            }
+            localStorage.setItem('apiUsage', JSON.stringify(apiUsage));
+            
+            if (apiUsage.count >= DAILY_LIMIT) {
+                DOM.fetchRateBtn.disabled = true;
+                DOM.apiLimitMessage.textContent = `คุณใช้โควต้าดึงข้อมูลสำหรับวันนี้ครบแล้ว (${apiUsage.count}/${DAILY_LIMIT})`;
+                DOM.apiLimitMessage.classList.remove('hidden');
+                return false;
+            }
+            
+            DOM.fetchRateBtn.disabled = false;
+            DOM.apiLimitMessage.textContent = `โควต้าคงเหลือ: ${DAILY_LIMIT - apiUsage.count}/${DAILY_LIMIT}`;
+            DOM.apiLimitMessage.classList.remove('hidden');
+            return true;
+        }
+
+        async function fetchExchangeRate() {
+            if (!checkApiLimit()) return;
+            
+            setLoading(true);
+            DOM.fetchRateBtn.textContent = 'กำลังดึง...';
+            DOM.fetchRateBtn.disabled = true;
+
+            try {
+                const response = await fetch(EXCHANGE_RATE_API_URL);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const data = await response.json();
+                
+                if (data.result === 'success' && data.conversion_rates.THB) {
+                    const rate = data.conversion_rates.THB;
+                    DOM.currentRateInput.value = rate.toFixed(4);
+                    const event = new Event('input', { bubbles: true });
+                    DOM.currentRateInput.dispatchEvent(event);
+                    
+                    let apiUsage = JSON.parse(localStorage.getItem('apiUsage'));
+                    apiUsage.count++;
+                    localStorage.setItem('apiUsage', JSON.stringify(apiUsage));
+                } else {
+                    DOM.apiLimitMessage.textContent = 'ไม่สามารถดึงข้อมูลเรทได้';
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                DOM.apiLimitMessage.textContent = 'เกิดข้อผิดพลาดในการเชื่อมต่อ';
+            } finally {
+                setLoading(false);
+                DOM.fetchRateBtn.textContent = 'ดึงเรทล่าสุด';
+                checkApiLimit();
+            }
+        }
 
         // --- Summary Calculations ---
         function updateSummaryCalculations() {
