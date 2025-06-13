@@ -1,6 +1,6 @@
 // Service Worker for Investment Tracker PWA
 
-const CACHE_NAME = 'investment-tracker-cache-v5';
+const CACHE_NAME = 'investment-tracker-cache-v6';
 const urlsToCache = [
   './',
   './index.html', // Assuming your main file is index.html
