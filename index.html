@@ -239,7 +239,8 @@
         }
 
         function renderDividendModule() {
-            const content = `<div class="bg-white p-6 rounded-2xl shadow-sm mb-6"><h2 class="text-xl font-bold mb-4 text-gray-700">บันทึกเงินปันผล</h2><div class="mb-4"><label for="div-stock-name" class="block text-sm font-medium text-gray-600 mb-1">ชื่อหุ้น (Symbol)</label><input type="text" id="div-stock-name" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="เช่น AAPL, PTT"></div><div class="grid grid-cols-2 gap-4"><div><label for="dividend-amount" class="block text-sm font-medium text-gray-600 mb-1">ปันผลที่ได้รับ (USD)</label><input type="number" id="dividend-amount" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="100"></div><div><label for="dividend-tax" class="block text-sm font-medium text-gray-600 mb-1">ภาษีหัก ณ ที่จ่าย (15%)</label><input type="number" id="dividend-tax" class="w-full px-4 py-2 bg-gray-200 border-transparent rounded-lg focus:outline-none cursor-not-allowed" placeholder="คำนวณอัตโนมัติ" readonly></div></div><button id="save-dividend" class="mt-6 w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-purple-700 transition-colors">บันทึกเงินปันผล</button></div><div><h3 class="text-lg font-bold mb-3 text-gray-700">ประวัติเงินปันผล</h3><div class="overflow-x-auto bg-white rounded-2xl shadow-sm"><table class="w-full text-sm text-left"><thead class="bg-gray-100 text-gray-600 uppercase"><tr><th class="p-4">ชื่อหุ้น</th><th class="p-4">ปันผล</th><th class="p-4">ภาษี</th><th class="p-4">ปันผลสุทธิ</th><th class="p-4 text-center">จัดการ</th></tr></thead><tbody id="dividend-history-table"></tbody></table></div></div>`;
+            // --- MODIFIED: Dividend tax is now a manual input field ---
+            const content = `<div class="bg-white p-6 rounded-2xl shadow-sm mb-6"><h2 class="text-xl font-bold mb-4 text-gray-700">บันทึกเงินปันผล</h2><div class="mb-4"><label for="div-stock-name" class="block text-sm font-medium text-gray-600 mb-1">ชื่อหุ้น (Symbol)</label><input type="text" id="div-stock-name" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="เช่น AAPL, PTT"></div><div class="grid grid-cols-2 gap-4"><div><label for="dividend-amount" class="block text-sm font-medium text-gray-600 mb-1">ปันผลที่ได้รับ (USD)</label><input type="number" id="dividend-amount" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="100"></div><div><label for="dividend-tax" class="block text-sm font-medium text-gray-600 mb-1">ภาษีหัก ณ ที่จ่าย (USD)</label><input type="number" id="dividend-tax" class="w-full px-4 py-2 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="15.00"></div></div><button id="save-dividend" class="mt-6 w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-purple-700 transition-colors">บันทึกเงินปันผล</button></div><div><h3 class="text-lg font-bold mb-3 text-gray-700">ประวัติเงินปันผล</h3><div class="overflow-x-auto bg-white rounded-2xl shadow-sm"><table class="w-full text-sm text-left"><thead class="bg-gray-100 text-gray-600 uppercase"><tr><th class="p-4">ชื่อหุ้น</th><th class="p-4">ปันผล</th><th class="p-4">ภาษี</th><th class="p-4">ปันผลสุทธิ</th><th class="p-4 text-center">จัดการ</th></tr></thead><tbody id="dividend-history-table"></tbody></table></div></div>`;
             DOM.allModules.dividend.innerHTML = content;
             const tableBody = DOM.allModules.dividend.querySelector('#dividend-history-table');
             tableBody.innerHTML = (appState.dividends || []).map(row => `
@@ -255,17 +256,10 @@
                 </tr>
             `).join('') || `<tr><td colspan="5" class="text-center p-4 text-gray-500">ไม่มีข้อมูล</td></tr>`;
             
-            const dividendAmountInput = DOM.allModules.dividend.querySelector('#dividend-amount');
-            const dividendTaxInput = DOM.allModules.dividend.querySelector('#dividend-tax');
-            
-            dividendAmountInput.addEventListener('input', () => {
-                const dividendAmount = parseFloat(dividendAmountInput.value) || 0;
-                const taxAmount = dividendAmount * 0.15;
-                dividendTaxInput.value = taxAmount.toFixed(2);
-            });
-            
+            // --- REMOVED: Automatic tax calculation event listener ---
             DOM.allModules.dividend.querySelector('#save-dividend').addEventListener('click', saveDividend);
         }
+
 
         // --- DATA HANDLING ---
         function setLoading(isLoading) {
@@ -344,28 +338,19 @@
                         </div>`;
                     break;
                 case 'dividend':
+                    // --- MODIFIED: Edit modal for dividend tax is now a manual input ---
                     formHtml = `
                          <div class="space-y-4">
                              <div><label class="block text-sm">ชื่อหุ้น</label><input type="text" id="edit-div-stock-name" value="${record.Stock_Name}" class="w-full mt-1 p-2 bg-gray-100 rounded-lg"></div>
                              <div><label class="block text-sm">ปันผลที่ได้รับ (USD)</label><input type="number" id="edit-dividend-amount" value="${record.Dividend_Amount}" class="w-full mt-1 p-2 bg-gray-100 rounded-lg"></div>
-                             <div><label class="block text-sm">ภาษีหัก ณ ที่จ่าย (15%)</label><input type="number" id="edit-dividend-tax" value="${record.Tax_Amount}" class="w-full mt-1 p-2 bg-gray-200 rounded-lg" readonly></div>
+                             <div><label class="block text-sm">ภาษีหัก ณ ที่จ่าย (USD)</label><input type="number" id="edit-dividend-tax" value="${record.Tax_Amount}" class="w-full mt-1 p-2 bg-gray-100 rounded-lg"></div>
                          </div>`;
                     break;
             }
             formContent.innerHTML = formHtml;
             
-            // Add event listener for the edit modal specifically for dividends
-            if (type === 'dividend') {
-                const editDividendAmountInput = document.getElementById('edit-dividend-amount');
-                const editDividendTaxInput = document.getElementById('edit-dividend-tax');
-                if (editDividendAmountInput && editDividendTaxInput) {
-                     editDividendAmountInput.addEventListener('input', () => {
-                        const dividendAmount = parseFloat(editDividendAmountInput.value) || 0;
-                        editDividendTaxInput.value = (dividendAmount * 0.15).toFixed(2);
-                     });
-                }
-            }
-
+            // --- REMOVED: Automatic tax calculation from edit modal ---
+            
             DOM.modal.classList.remove('hidden');
             DOM.modalBackdrop.classList.remove('hidden');
         }
@@ -451,6 +436,12 @@
             if (!payload.stockName || !payload.dividendAmount) {
                 alert('กรุณากรอกชื่อหุ้นและจำนวนปันผล');
                 return;
+            }
+            // Tax is now manually entered, so we don't need to check for it specifically,
+            // but we can ensure it's a number.
+            if (isNaN(payload.taxAmount)) {
+                 alert('กรุณากรอกภาษีหัก ณ ที่จ่ายเป็นตัวเลข');
+                 return;
             }
             postData('addDividend', payload);
             DOM.allModules.dividend.querySelector('#div-stock-name').value = '';
