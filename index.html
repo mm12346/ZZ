@@ -549,6 +549,12 @@
                 appState.currency = data.currency;
                 appState.stocks = data.stocks;
                 appState.dividends = data.dividends;
+
+                // Set the initial value for the exchange rate input to the average rate
+                if (appState.summary && appState.summary.avgRate) {
+                    DOM.currentRateInput.value = parseFloat(appState.summary.avgRate).toFixed(4);
+                }
+                
                 renderAll();
             } catch (error) {
                 console.error('Initialization failed:', error);
