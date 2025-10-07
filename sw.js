@@ -1,6 +1,6 @@
 // Service Worker for Investment Tracker PWA
 
-const CACHE_NAME = 'investment-tracker-cache-v10'; // Incremented cache version
+const CACHE_NAME = 'investment-tracker-cache-v12'; // Incremented cache version
 const urlsToCache = [
   './',
   './index.html', // Assuming your main file is index.html
