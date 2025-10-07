@@ -1,12 +1,12 @@
 // Service Worker for Investment Tracker PWA
 
-const CACHE_NAME = 'investment-tracker-cache-v12'; // Incremented cache version
+const CACHE_NAME = 'investment-tracker-cache-v13'; // Incremented cache version
 const urlsToCache = [
   './',
   './index.html', // Assuming your main file is index.html
   'https://cdn.tailwindcss.com',
   'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap',
-  'https://raw.githubusercontent.com/mm12346/ZZ/refs/heads/main/991.jpg' // Updated icon
+  'https://raw.githubusercontent.com/mm12346/isara/refs/heads/main/991.jpg' // Updated icon
 ];
 
 // Install event: open a cache and add the "app shell" files to it
