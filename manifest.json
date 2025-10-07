@@ -1,6 +1,6 @@
 {
-    "name": "SAMCRO",
-    "short_name": "SAMCRO",
+    "name": "SATOOK JOURNAL",
+    "short_name": "SATOOK JOURNAL",
     "start_url": "./index.html",
     "display": "standalone",
     "background_color": "#f9fafb",
@@ -8,13 +8,13 @@
     "description": "App for tracking currency exchange and stock portfolio.",
     "icons": [
         {
-            "src": "https://raw.githubusercontent.com/mm12346/ZZ/refs/heads/main/991.jpg",
+            "src": "https://raw.githubusercontent.com/mm12346/isara/refs/heads/main/991.jpg",
             "sizes": "192x192",
             "type": "image/jpeg",
             "purpose": "any maskable"
         },
         {
-            "src": "https://raw.githubusercontent.com/mm12346/ZZ/refs/heads/main/991.jpg",
+            "src": "https://raw.githubusercontent.com/mm12346/isara/refs/heads/main/991.jpg",
             "sizes": "512x512",
             "type": "image/jpeg",
             "purpose": "any maskable"
